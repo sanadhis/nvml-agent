@@ -20,7 +20,9 @@
     state: directory
 
 - name: Get pynmvl software {{ pynvml_version }}
-  shell: "wget {{ pynvml_url }} -O {{ software_dir }}/pynvml.tar.gz"
+  get_url: 
+    url: "{{ pynvml_url }}"
+    dest: "{{ software_dir }}/pynvml.tar.gz"
 
 - name: Untar pynvml.tar.gz
   unarchive:
