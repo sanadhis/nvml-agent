@@ -34,3 +34,4 @@
   args:
     chdir: "{{ software_dir }}/nvidia-ml-py-{{ pynvml_version }}/"
   become: true
+  become_user: root
