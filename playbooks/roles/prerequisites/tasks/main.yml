@@ -24,7 +24,7 @@
 
 - name: Untar pynvml.tar.gz
   unarchive:
-    src: "{{ sofware_dir }}/pynvml.tar.gz"
+    src: "{{ software_dir }}/pynvml.tar.gz"
     dest: "{{ software_dir }}"
 
 - name: Install pynvml {{ pynvml_version }}
