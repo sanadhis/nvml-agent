@@ -2,14 +2,19 @@
 
 > Monitor NVIDIA GPU usage for each container in Kubernetes' pods.
 
-## Prerequisites - Ansible
+## Prerequisites - jq & Ansible
 
-1. Make sure you have [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) in your machine by issuing this command:
+1. Make sure you have jq:
+  ```bash
+  $ sudo apt-get update && sudo apt-get install jq
+  ```
+
+2. Make sure you have [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) in your machine by issuing this command:
   ```bash
   $ ansible -V
   ```
-2. If you don't have it, I encourage you to install via pip:
 
+3. If you don't have ansible in your machine, I encourage you to install via pip:
   ```bash
   $ pip install ansible
   ```
