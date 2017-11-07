@@ -23,7 +23,7 @@
   shell: "wget {{ pynvml_url }} -O {{ software_dir }}/pynvml.tar.gz"
 
 - name: Untar pynvml.tar.gz
-  unarchieve:
+  unarchive:
     src: "{{ sofware_dir }}/pynvml.tar.gz"
     dest: "{{ software_dir }}"
 
