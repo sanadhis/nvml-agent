@@ -1,0 +1,33 @@
+- name: Read Prerequisites Vars
+  include_vars: "{{ current_dir }}/vars/prerequisites.yml"
+
+- name: Set pynmvl download url
+  set_fact:
+    pynvml_url: "https://pypi.python.org/packages/72/31/378ca145e919ca415641a0f17f2669fa98c482a81f1f8fdfb72b1f9dbb37/nvidia-ml-py-{{ pynvml_version | default('7.352.0') }}.tar.gz"
+
+- name: Set software dir
+  set_fact:
+    software_dir : "{{ ansible_env.HOME }}/.software"
+
+- name: Install python-influxdb
+  pip: 
+    name: "influxdb"
+    version: "{{ python_influxdb_version | default('4.1.1') }}"
+
+- name: Ensure .software dir
+  file:
+    path: "{{ software_dir }}"
+    state: directory
+
+- name: Get pynmvl software {{ pynvml_version }}
+  shell: "wget {{ pynvml_url }} -O {{ software_dir }}/pynvml.tar.gz"
+
+- name: Untar pynvml.tar.gz
+  unarchieve:
+    src: "{{ sofware_dir }}/pynvml.tar.gz"
+    dest: "{{ software_dir }}"
+
+- name: Install pynvml {{ pynvml_version }}
+  shell: python setup.py install
+  args:
+    chdir: "{{ software_dir }}/pynvml"

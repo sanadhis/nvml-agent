@@ -1,0 +1,2 @@
+python_influxdb_version: "4.1.1"
+pynvml_version: "7.352.0"

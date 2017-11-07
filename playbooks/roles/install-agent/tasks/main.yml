@@ -1,0 +1,9 @@
+- name: Set nvml-agent dir
+  set_fact:
+    nvml_agent_dir : "{{ ansible_env.HOME }}/.nvml-agent"
+
+- name: Ensure .nvml_agent dir
+  file:
+    path: "{{ nvml_agent_dir }}"
+    state: directory
+
