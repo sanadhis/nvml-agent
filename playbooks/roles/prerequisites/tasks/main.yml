@@ -33,3 +33,4 @@
   shell: python setup.py install
   args:
     chdir: "{{ software_dir }}/nvidia-ml-py-{{ pynvml_version }}/"
+  become: true
