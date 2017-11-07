@@ -19,7 +19,7 @@ function main () {
     PLAYBOOK="nvml-agent.yml"
     current_dir="$PWD"
 
-    ansible-playbook playbooks/$PLAYBOOK \
+    ansible-playbook playbooks/$PLAYBOOK -K \
       -i $PWD/inventory/target \
       -e "target=kube-cluster" \
       -e "current_dir=${current_dir}"
