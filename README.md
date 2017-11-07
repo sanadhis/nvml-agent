@@ -11,7 +11,7 @@
 
 2. Make sure you have [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) in your machine by issuing this command:
   ```bash
-  $ ansible -V
+  $ ansible --version
   ```
 
 3. If you don't have ansible in your machine, I encourage you to install via pip:
