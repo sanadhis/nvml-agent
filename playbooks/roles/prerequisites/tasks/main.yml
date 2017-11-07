@@ -32,4 +32,4 @@
 - name: Install pynvml {{ pynvml_version }}
   shell: python setup.py install
   args:
-    chdir: "{{ software_dir }}/pynvml"
+    chdir: "nvidia-ml-py-{{ pynvml_version }}/pynvml"
