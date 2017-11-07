@@ -23,6 +23,30 @@
   $ pip install ansible==2.2.0
   ```
 
+## Prerequisites - Usage
+
+1. Make sure to execute the script in a machine that can list all nodes in your kubernetes cluster
+  ```bash
+  $ kubectl get nodes
+  ```
+
+2. Make sure you can access all machines by SSH
+  ```bash
+  $ ssh [your-node-1]
+  ```
+
+## Usage
+
+1. If you just want to install the prerequisites software:
+  ```bash
+  $ ./install-prerequisites.sh
+  ```
+
+2. By default, the prerequisites check will be executed even if you just run the install script:
+  ```bash
+  $ ./install.sh
+  ```
+
 ## Maintainer
 
 - Sanadhi Sutandi ([@sanadhis](https://github.com/sanadhis))
