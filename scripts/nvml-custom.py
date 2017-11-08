@@ -2,7 +2,7 @@ import pynvml as N
 import psutil
 import os.path
 import subprocess
-import time
+from time import sleep
 
 def get_process_info(nv_process, pid):
     """Get the process information of specific pid"""
@@ -90,11 +90,12 @@ def benchmark_gpu(device_count):
             pod = out.split("\n")[3]
             namespace = out.split("\n")[4]
             print(container,pod,namespace,proc['username'],proc['gpu_memory_usage'],proc['pid'])
+        sleep(1)        
 
 if __name__ == "__main__":
     N.nvmlInit()
     device_count = N.nvmlDeviceGetCount()
     while True:
         benchmark_gpu(device_count)
-        time.sleep(2)
+        sleep(1)
     N.nvmlShutdown()
