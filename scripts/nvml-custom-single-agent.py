@@ -22,13 +22,10 @@ def get_process_info(nv_process, pid):
 
 def get_parent_process_info(process_pid):
     process  = psutil.Process(pid=process_pid)
-    parent   = process.parent()
-    children = process
-    while True:
-        if(parent.name == "docker-containerd-shim"):
-            children = parent.children()[0]
+    while process.parent().name != "docker-containerd-shim":
+        process = process.parent()
 
-    return children.pid
+    return process.pid
 
 def benchmark_gpu(device_count):
     for index in range(device_count):
