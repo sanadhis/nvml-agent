@@ -22,7 +22,7 @@ def get_process_info(nv_process, pid):
 
 def get_parent_process_info(process_pid):
     process  = psutil.Process(pid=process_pid)
-    while process.parent().name != "docker-containerd-shim":
+    while process.parent().name() != "docker-containerd-shim":
         process = process.parent()
 
     return process.pid
