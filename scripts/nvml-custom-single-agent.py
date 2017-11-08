@@ -25,7 +25,7 @@ def get_parent_process_info(process_pid):
     while process.parent().name() != "docker-containerd-shim":
         process = process.parent()
 
-    return process.pid
+    return process
 
 def benchmark_gpu(device_count):
     for index in range(device_count):
@@ -93,7 +93,7 @@ def benchmark_gpu(device_count):
 
         for proc,parentProc in zip(processes,parentProcesses):
             p = subprocess.Popen(
-                ["bash", "get-pod-from-pid-2.sh", str(parentProc['pid'])],
+                ["bash", "get-pod-from-pid-2.sh", str(parentProc.pid)],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
