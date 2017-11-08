@@ -93,9 +93,9 @@ def benchmark_gpu(device_count):
 
         print(index, name, uuid)
 
-        for proc in processes:
+        for proc,parentProc in zip(processes,parentProcesses):
             p = subprocess.Popen(
-                ["bash", "get-pod-from-pid.sh", str(proc['pid']) ],
+                ["bash", "get-pod-from-pid-2.sh", str(parentProc['pid'])],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
