@@ -20,7 +20,8 @@ def get_process_info(nv_process, pid):
     process['pid'] = nv_process.pid
     return process
 
-def get_parent_process_info(process):
+def get_parent_process_info(process_pid):
+    process  = psutil.Process(pid=process_pid)
     parent   = process.parent()
     children = process
     while True:
@@ -81,7 +82,7 @@ def benchmark_gpu(device_count):
                 # CPU percentage, create time etc.
                 try:
                     process = get_process_info(nv_process, nv_process.pid)
-                    parentProcess = get_parent_process_info(process)
+                    parentProcess = get_parent_process_info(nv_process.pid)
 
                     processes.append(process)
                     parentProcesses.append(parentProcess)
