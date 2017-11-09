@@ -2,7 +2,10 @@ import pynvml as N
 import psutil
 import os.path
 import subprocess
+import socket
 from time import sleep
+
+HOSTNAME = socket.gethostname()
 
 def get_process_info(nv_process, pid):
     """Get the process information of specific pid"""
@@ -26,6 +29,37 @@ def get_parent_process_info(process_pid):
         process = process.parent()
 
     return process
+
+def get_pod_info(pod_pid):
+    p = subprocess.Popen(
+                    ["docker", "ps", "-q"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+    out,err = p.communicate()
+    container_ids = out.split("\n")
+    pod = {}
+    for container_id in container_ids:
+        p = subprocess.Popen(
+                        ["docker", "inspect", "--format","'{{.State.Pid}} {{.Name}} {{.Id}}'",container_id],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        pod_info = out.split("\n")[0].replace("'","").split()
+        if pod[0] == str(pod_pid)
+            break
+    
+    pod['pid']            = pod_info[0]
+    pod_container_details = pod_info[1].split("_")
+
+    pod['container']      = pod_container_details[1]        
+    pod['name']           = pod_container_details[2]
+    pod['namespace']      = pod_container_details[3]
+
+    pod['container_id']   = pod_info[2]   
+
+    return pod
 
 def benchmark_gpu(device_count):
     for index in range(device_count):
@@ -89,19 +123,11 @@ def benchmark_gpu(device_count):
                     # e.g. nvidia-smi reset  or  reboot the system
                     pass
 
-        print(index, name, uuid)
+        print(HOSTNAME, name, index,  uuid)
 
         for proc,parentProc in zip(processes,parentProcesses):
-            p = subprocess.Popen(
-                ["bash", "get-pod-from-pid-2.sh", str(parentProc.pid)],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            container = out.split("\n")[2]
-            pod = out.split("\n")[3]
-            namespace = out.split("\n")[4]
-            print(container,pod,namespace,proc['username'],proc['gpu_memory_usage'],proc['pid'])
+            pod = get_pod_info(parentProc.pid)
+            print(pod['container'],pod['name'],pod['namespace'],proc['username'],proc['gpu_memory_usage'],proc['pid'])
         sleep(1)        
 
 if __name__ == "__main__":
