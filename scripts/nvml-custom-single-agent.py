@@ -47,7 +47,7 @@ def get_pod_info(pod_pid):
                         stderr=subprocess.PIPE)
         out, err = p.communicate()
         pod_info = out.split("\n")[0].replace("'","").split()
-        if pod[0] == str(pod_pid)
+        if pod[0] == str(pod_pid):
             break
     
     pod['pid']            = pod_info[0]
