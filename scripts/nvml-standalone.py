@@ -1,21 +1,39 @@
+from time import sleep
+from datetime import datetime
+from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
+
 import pynvml as N
 import psutil
 import os.path
 import subprocess
 import socket
-from time import sleep
+import sys
 
-class GPUStat:
-    def __init__(self):
-        pass    
+"""Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU"""
+class GPUStat(object):
+    def __init__(self, gpus_pod_usage={}):
+        """Constructor of GPUStat class
+        Args:
+            gpus_pod_usage (py dictionary, default empty): Information of GPU usage by Pods (should be dict)
+        Fields: 
+            gpus_pod_usage (py dictionary) : A detailed information of per-container GPU utilization in each GPU on a machine
+            hostname       (string)        : The hostname of current machine
+            query_time     (datetime)      : Time information when the object created
+        """
+        self.gpus_pod_usage = gpus_pod_usage
+
+        # attach host and time information of each GPUStat
+        self.hostname       = socket.gethostname()
+        self.query_time     = datetime.now()
 
     @staticmethod
     def new_query():
-        """Query the information of all the GPUs on the machine & Trace Pod Processes that utilize them"""
+        """Query the information of all the GPUs on the machine & Trace Pod Processes that utilize them
+        Returns:
+        GPUStat Object : Statistics and details to account GPU usage by Pods
+        """
         
-        N.nvmlInit()
-        hostname = socket.gethostname()        
-
         def get_process_info(nv_process):
             """Get the process information of specific GPU process ; username, command, pid, and GPU memory usage
             Args:
@@ -203,7 +221,6 @@ class GPUStat:
 
                 # Store utilization per gpu
                 per_gpu_usage = {
-                                "hostname" : hostname,
                                 "gpu_name" : name,
                                 "gpu_index": index,
                                 "gpu_uuid" : uuid,
@@ -215,11 +232,80 @@ class GPUStat:
             
             return gpus_usage
         
-        pods_gpu_usage = benchmark_gpu()
+        # init the python-nvml driver
+        N.nvmlInit()
+
+        # get current utilization in each GPU and corresponding pods details
+        gpus_pod_usage = benchmark_gpu()
+
+        # close the python-nvml driver        
         N.nvmlShutdown()
-        return pods_gpu_usage        
+
+        # return query result as GPUStat object
+        return GPUStat(gpus_pod_usage)        
+
+"""Class InfluxdbDriver : handle write process of GPU stats into Influxdb server"""
+class InfluxDBDriver:
+    def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db):
+        try:
+            client = InfluxDBClient(influxdb_host,
+                                    influxdb_port,
+                                    influxdb_user,
+                                    influxdb_pass,
+                                    influxdb_db
+                                   )
+        except InfluxDBClientError:
+            client = None
+            print("Not Working") 
+
+        self.client = client
+
+    def write(self, gpu_stats):
+        nodename  = gpu_stats.hostname
+        stat_time = gpu_stats.query_time
+
+        for gpu_stat in gpu_stats.gpus_pod_usage:
+            gpu_name  = gpu_stat["gpu_name"]
+            gpu_index = gpu_stat["gpu_index"]
+
+            gpu_uuid  = gpu_stat["gpu_uuid"]
+            gpu_usage = gpu_stat["gpu_usage"]
+            
+            for usage in gpu_usage:
+                pod_container_name = usage['pod_container_name']
+                pod_name           = usage['pod_name']
+                namespace_name     = usage['pod_namespace']
+                pod_gpu_usage      = usage['pod_gpu_usage']
+
+                json_body = [
+                                {
+                                    "measurement": "gpu/usage",
+                                    "tags": {
+                                        "nodename" : nodename,
+                                        "gpu_name" : gpu_name,
+                                        "gpu_uuid" : gpu_uuid,
+                                        "gpu_index": gpu_index,
+                                        "pod_name" : pod_name,
+                                        "pod_container_name" : pod_container_name,
+                                        "namespace_name" : namespace_name
+                                    },
+                                    "time": stat_time,
+                                    "fields": {
+                                        "value": pod_gpu_usage
+                                    }
+                                }
+                            ]
+                try:
+                    self.client.write_points(json_body)
+                except InfluxDBClientError as err:
+                    print("Influx is not working here: ",err)             
+                    pass 
 
 if __name__ == "__main__":
-    gpu_stats       = GPUStat()
-    pods_gpu_usage  = gpu_stats.new_query()
-    print(pods_gpu_usage)
+    influx_host = sys.argv[1]
+    influx_port = sys.argv[2]
+
+    gpu_stats       = GPUStat().new_query()
+    print(gpu_stats.gpus_pod_usage)
+    influxClient = InfluxDBDriver(influx_host, influx_port, 'root', 'root', 'k8s')
+    influxClient.write(gpu_stats)
