@@ -130,60 +130,47 @@ class GPUStat:
         def benchmark_gpu():
             """Query all utilizations in each GPU and resolve them to pod information and identity"""
             
-            device_count = N.nvmlDeviceGetCount()    
-            gpu_usages   = []
+            # detect all NVIDIA GPU in machine
+            device_count = N.nvmlDeviceGetCount()
+
+            # Init empty list to store usage by each GPU
+            gpus_usage   = []
             
+            # Iterate through available GPU
             for index in range(device_count):
+                # get the NVML object based on GPU's index target
+                # get the name and uuid of NVIDIA GPU
                 handle = N.nvmlDeviceGetHandleByIndex(index)
                 name   = (N.nvmlDeviceGetName(handle))
                 uuid   = (N.nvmlDeviceGetUUID(handle))
 
+                # init list to store process and parent container (pod) for each process that utilizes NVIDIA
+                # process        = jobs (container) that utilize NVIDA GPU
+                # parent process = parent container (pod) that utilize NVIDIA GPU
                 processes       = []
                 parentProcesses = []
                 
-                try:
-                    temperature = N.nvmlDeviceGetTemperature(handle, N.NVML_TEMPERATURE_GPU)
-                except:
-                    temperature = None
-
-                try:
-                    memory = N.nvmlDeviceGetMemoryInfo(handle) # in Bytes
-                except N.NVMLError:
-                    memory = None  # Not supported
-
-                try:
-                    utilization = N.nvmlDeviceGetUtilizationRates(handle)
-                except N.NVMLError:
-                    utilization = None  # Not supported
-
-                try:
-                    power = N.nvmlDeviceGetPowerUsage(handle)
-                except:
-                    power = None
-
-                try:
-                    power_limit = N.nvmlDeviceGetEnforcedPowerLimit(handle)
-                except:
-                    power_limit = None
-
+                # Get running processes in each GPU
                 try:
                     nv_comp_processes = N.nvmlDeviceGetComputeRunningProcesses(handle)
                 except N.NVMLError:
                     nv_comp_processes = None  # Not supported
+
+                # Get running graphics processes in each GPU                
                 try:
                     nv_graphics_processes = N.nvmlDeviceGetGraphicsRunningProcesses(handle)
                 except N.NVMLError:
                     nv_graphics_processes = None  # Not supported
 
+                # Check if process is found or not
                 if nv_comp_processes is None and nv_graphics_processes is None:
                     processes = None   # Not supported (in both cases)
                 else:
                     nv_comp_processes     = nv_comp_processes or []
                     nv_graphics_processes = nv_graphics_processes or []
-
+                    # Iterate through running process found, inspect each process 
+                    # and find corresponding pod (parent container) that run the process
                     for nv_process in (nv_comp_processes + nv_graphics_processes):
-                        # TODO: could be more information such as system memory usage,
-                        # CPU percentage, create time etc.
                         try:
                             process       = get_process_info(nv_process)
                             parentProcess = get_parent_process_info(nv_process)
@@ -195,9 +182,14 @@ class GPUStat:
                         except psutil.Error:
                             print("Error: PSutil General")
 
+                # list, each GPU can have >1 running process(es) (but in Kubernetes 1.8, they should come from same container/pod)
                 pod_details = []
+
+                # iterate throught the pair process (container) & parent process (pod/parent container)
                 for proc,parentProc in zip(processes,parentProcesses):
+                    # get pod detail from parentProc.pid
                     pod        = get_pod_info(parentProc.pid)
+                    # store the detail
                     pod_detail = {
                                     "pod_container_name": pod['container_name'],
                                     "pod_name"          : pod['name'],
@@ -206,19 +198,22 @@ class GPUStat:
                                     "pod_gpu_usage"     : proc['gpu_memory_usage'],
                                     "pod_proc_pid"      : proc['pid']
                                 }
+                    # information of each pod that runs jobs in kubernetes cluster
                     pod_details.append(pod_detail)
 
+                # Store utilization per gpu
                 per_gpu_usage = {
                                 "hostname" : hostname,
                                 "gpu_name" : name,
                                 "gpu_index": index,
                                 "gpu_uuid" : uuid,
                                 "gpu_usage": pod_details
-                            }
+                               }
 
-                gpu_usages.append(per_gpu_usage)
+                # append per-gpu usage
+                gpus_usage.append(per_gpu_usage)
             
-            return gpu_usages
+            return gpus_usage
         
         pods_gpu_usage = benchmark_gpu()
         N.nvmlShutdown()
