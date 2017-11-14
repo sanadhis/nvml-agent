@@ -304,16 +304,19 @@ class InfluxDBDriver:
 
 def main():
     try:
-        conf_file = sys.argv[1]
+        conf_file       = sys.argv[1]
         with open(conf_file, "r") as  ymlfile:
-            cfg = yaml.load(ymlfile)
+            influx_cfg  = (yaml.load(ymlfile))[:5]
 
         gpu_stats       = GPUStat().new_query()
         print(gpu_stats.gpus_pod_usage)
-        influxClient = InfluxDBDriver(influx_host, influx_port, 'root', 'root', 'k8s')
+        
+        influxClient = InfluxDBDriver(*influx_cfg)
         influxClient.write(gpu_stats)
-    except:
-        pass
+    except IndexError:
+        print("Error: Configuration file is not given!")
+    except IOError:
+        print("Error: File does not exist!")
 
 if __name__ == "__main__":
     main()

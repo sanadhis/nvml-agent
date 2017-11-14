@@ -313,8 +313,10 @@ def main():
         
         influxClient = InfluxDBDriver(*influx_cfg)
         influxClient.write(gpu_stats)
-    except:
-        pass
+    except IndexError:
+        print("Error: Configuration file is not given!")
+    except IOError:
+        print("Error: File does not exist!")
 
 if __name__ == "__main__":
     main()
