@@ -14,7 +14,7 @@
   influxdb_port: "8086"
   influxdb_user: "root"
   influxdb_pass: "root"
-  influxdb_db: "k8s"
+  influxdb_db  : "k8s"
   ```
 
 3. Execute nvml-agent.py with /path/to/conf/file as argument:
@@ -64,7 +64,7 @@
   $ ./get-pod-from-pid.sh "103565"
   ```
 
-3. Exlanation about output:
+3. Explanation about the output:
   ```bash
   [1st] : parent container process pid (pods pid)
   [2nd] : details of the pod; docker container name and docker process id
