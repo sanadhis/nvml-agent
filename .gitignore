@@ -1,2 +1,3 @@
 inventory
 *.retry
+.DS_Store
