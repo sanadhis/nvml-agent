@@ -3,12 +3,13 @@ from datetime import datetime
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
+import os.path
 import pynvml as N
 import psutil
-import os.path
 import subprocess
 import socket
 import sys
+import yaml
 
 """Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU"""
 class GPUStat(object):
@@ -301,11 +302,19 @@ class InfluxDBDriver:
                     print("Influx is not working here: ",err)             
                     pass 
 
-if __name__ == "__main__":
-    influx_host = sys.argv[1]
-    influx_port = sys.argv[2]
+def main():
+    try:
+        conf_file       = sys.argv[1]
+        with open(conf_file, "r") as  ymlfile:
+            influx_cfg  = (yaml.load(ymlfile))[:5]
 
-    gpu_stats       = GPUStat().new_query()
-    print(gpu_stats.gpus_pod_usage)
-    influxClient = InfluxDBDriver(influx_host, influx_port, 'root', 'root', 'k8s')
-    influxClient.write(gpu_stats)
+        gpu_stats       = GPUStat().new_query()
+        print(gpu_stats.gpus_pod_usage)
+        
+        influxClient = InfluxDBDriver(*influx_cfg)
+        influxClient.write(gpu_stats)
+    except:
+        pass
+
+if __name__ == "__main__":
+    main()

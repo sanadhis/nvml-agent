@@ -1,9 +1,18 @@
 - name: Set nvml-agent dir
   set_fact:
-    nvml_agent_dir : "{{ ansible_env.HOME }}/.nvml-agent"
+    nvml_agent_dir : "/etc/nvml-agent"
 
-- name: Ensure .nvml_agent dir
+- name: Ensure NVML agent dir
   file:
     path: "{{ nvml_agent_dir }}"
     state: directory
 
+- name: Install NVML Agent
+  become: True
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ nvml_agent_dir }}/{{ item }}"
+  with_items:
+    - "conf.yaml"
+    - "get-pod-from-pid.sh"
+    - "nvml-agent.py"
