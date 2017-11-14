@@ -249,16 +249,16 @@ class GPUStat(object):
 # --------- Class InfluxdbDriver : handle write process of GPU stats into Influxdb server -------- #
 class InfluxDBDriver:
     def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db, *args):
-    """Constructor of InfluxDBDriver class
-    Args:
-        influxdb_host (string) : Hostname (URL) of influxdb server, to store the data for.
-        influxdb_port (string) : Port which infludb server is running on.
-        influxdb_user (string) : Access username.
-        influxdb_pass (string) : Access password.
-        influxdb_db   (string) : db name to write the GPU stats for.
-    Fields: 
-        client (InfluxDBClient): Connection object for the given Influxdb
-    """
+        """Constructor of InfluxDBDriver class
+        Args:
+            influxdb_host (string) : Hostname (URL) of influxdb server, to store the data for.
+            influxdb_port (string) : Port which infludb server is running on.
+            influxdb_user (string) : Access username.
+            influxdb_pass (string) : Access password.
+            influxdb_db   (string) : db name to write the GPU stats for.
+        Fields: 
+            client (InfluxDBClient): Connection object for the given Influxdb
+        """
 
         # Try connecting to influxdb instance
         try:
@@ -276,12 +276,12 @@ class InfluxDBDriver:
         self.client = client
 
     def write(self, gpu_stats):
-    """Write the gpus' usage statistics to influxdb server
-    Args:
-        gpu_stats (GPUStat Obj) : Statistics and details to account GPU usage by Pods.
-    Returns: 
-        None
-    """
+        """Write the gpus' usage statistics to influxdb server
+        Args:
+            gpu_stats (GPUStat Obj) : Statistics and details to account GPU usage by Pods.
+        Returns: 
+            None
+        """
         # get hostname and timestamp of the query
         nodename  = gpu_stats.hostname
         stat_time = gpu_stats.query_time
