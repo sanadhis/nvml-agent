@@ -56,7 +56,7 @@ Go to /scripts dir and find detailed instruction there.
 - [Docker-NVIDIA-GPU](https://github.com/NVIDIA/nvidia-docker/wiki)
 - [Kubernetes-NVIDIA-GPU](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
 
-Or follow my scripts for installing GPU: [here](https://github.com/sanadhis/kube-ubuntu-utils)
+Or follow my scripts for installing nvidia driver in ubuntu: [here](https://github.com/sanadhis/kube-ubuntu-utils)
 
 ## Maintainer
 
