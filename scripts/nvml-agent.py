@@ -247,7 +247,7 @@ class GPUStat(object):
 
 """Class InfluxdbDriver : handle write process of GPU stats into Influxdb server"""
 class InfluxDBDriver:
-    def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db):
+    def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db, *args):
         try:
             client = InfluxDBClient(influxdb_host,
                                     influxdb_port,
@@ -306,12 +306,12 @@ def main():
     try:
         conf_file       = sys.argv[1]
         with open(conf_file, "r") as  ymlfile:
-            influx_cfg  = (yaml.load(ymlfile))[:5]
+            influx_cfg  = (yaml.load(ymlfile))
 
         gpu_stats       = GPUStat().new_query()
         print(gpu_stats.gpus_pod_usage)
         
-        influxClient = InfluxDBDriver(*influx_cfg)
+        influxClient = InfluxDBDriver(**influx_cfg)
         influxClient.write(gpu_stats)
     except IndexError:
         print("Error: Configuration file is not given!")
