@@ -29,7 +29,7 @@
 
 2. Execute nvml.py:
   ```bash
-  $ python nvml-agent
+  $ python nvml.py
   ```
 
 ## Testing the pid-to-pod resolutions with get-pod-from-pid.sh
