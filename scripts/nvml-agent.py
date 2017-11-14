@@ -11,7 +11,7 @@ import socket
 import sys
 import yaml
 
-"""Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU"""
+# --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #
 class GPUStat(object):
     def __init__(self, gpus_pod_usage={}):
         """Constructor of GPUStat class
@@ -245,9 +245,21 @@ class GPUStat(object):
         # return query result as GPUStat object
         return GPUStat(gpus_pod_usage)        
 
-"""Class InfluxdbDriver : handle write process of GPU stats into Influxdb server"""
+# --------- Class InfluxdbDriver : handle write process of GPU stats into Influxdb server -------- #
 class InfluxDBDriver:
     def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db, *args):
+    """Constructor of InfluxDBDriver class
+    Args:
+        influxdb_host (string) : Hostname (URL) of influxdb server, to store the data for.
+        influxdb_port (string) : Port which infludb server is running on.
+        influxdb_user (string) : Access username.
+        influxdb_pass (string) : Access password.
+        influxdb_db   (string) : db name to write the GPU stats for.
+    Fields: 
+        client (InfluxDBClient): Connection object for the given Influxdb
+    """
+
+        # Try connecting to influxdb instance
         try:
             client = InfluxDBClient(influxdb_host,
                                     influxdb_port,
@@ -259,25 +271,37 @@ class InfluxDBDriver:
             client = None
             print("Not Working") 
 
+        # this->object->client
         self.client = client
 
     def write(self, gpu_stats):
+    """Write the gpus' usage statistics to influxdb server
+    Args:
+        gpu_stats (GPUStat Obj) : Statistics and details to account GPU usage by Pods.
+    Returns: 
+        None
+    """
+        # get hostname and timestamp of the query
         nodename  = gpu_stats.hostname
         stat_time = gpu_stats.query_time
 
+        # iterate though all available GPU in machine
         for gpu_stat in gpu_stats.gpus_pod_usage:
+            # Assign and gather identity of each GPU
             gpu_name  = gpu_stat["gpu_name"]
             gpu_index = gpu_stat["gpu_index"]
-
             gpu_uuid  = gpu_stat["gpu_uuid"]
             gpu_usage = gpu_stat["gpu_usage"]
             
+            # iterate through all pods' processes in each gpu     
             for usage in gpu_usage:
+                # Assign and gather information of pods' utilization
                 pod_container_name = usage['pod_container_name']
                 pod_name           = usage['pod_name']
                 namespace_name     = usage['pod_namespace']
                 pod_gpu_usage      = usage['pod_gpu_usage']
 
+                # Form the data to write with json format
                 json_body = [
                                 {
                                     "measurement": "gpu/usage",
@@ -296,23 +320,33 @@ class InfluxDBDriver:
                                     }
                                 }
                             ]
+
+                # attempt writing into influxdb
                 try:
                     self.client.write_points(json_body)
                 except InfluxDBClientError as err:
                     print("Influx is not working here: ",err)             
                     pass 
 
+# --------- Main function goes here -------- #
 def main():
+    """Read stats from GPU and write them into Influxdb server"""
+
     try:
-        conf_file       = sys.argv[1]
+        # Read configuration file with YAML format
+        conf_file = sys.argv[1]
         with open(conf_file, "r") as  ymlfile:
             influx_cfg  = (yaml.load(ymlfile))
 
-        gpu_stats       = GPUStat().new_query()
+        # Request the GPU statistics
+        gpu_stats = GPUStat().new_query()
         print(gpu_stats.gpus_pod_usage)
         
+        # Connect into Influxdb instance using given configuration
         influxClient = InfluxDBDriver(**influx_cfg)
+        # Write the statistics into Influxdb        
         influxClient.write(gpu_stats)
+    
     except IndexError:
         print("Error: Configuration file is not given!")
     except IOError:
@@ -320,5 +354,7 @@ def main():
     except:
         print("Error")
 
+
+# --------- Main function triggered here -------- #
 if __name__ == "__main__":
     main()
