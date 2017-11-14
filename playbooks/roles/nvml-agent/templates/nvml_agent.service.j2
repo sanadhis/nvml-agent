@@ -1,0 +1,14 @@
+[Unit]
+Description=NVML Agent
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/etc/nvml-agent/start '/etc/nvml-agent/conf.yaml'
+Restart=always
+StartLimitInterval=0
+RestartSec=5
+PIDFile=/run/nvml_agent.pid
+
+[Install]
+WantedBy=multi-user.target

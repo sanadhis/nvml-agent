@@ -3,6 +3,7 @@
     nvml_agent_dir : "/etc/nvml-agent"
 
 - name: Ensure NVML agent dir
+  become: True
   file:
     path: "{{ nvml_agent_dir }}"
     state: directory
@@ -16,3 +17,25 @@
     - "conf.yaml"
     - "get-pod-from-pid.sh"
     - "nvml-agent.py"
+    - "start"
+
+- name: Install NVML Agent service
+  become: True
+  template:
+    src: "nvml_agent.service.j2"
+    dest: "/etc/systemd/system/nvml_agent.service"
+
+- name: Reload Daemon
+  become: True
+  systemd: daemon_reload=yes
+
+- name: enable service nvml-agent and ensure it is not masked
+  become: True 
+  systemd:
+    name: nvml_agent
+    enabled: yes
+    masked: no
+
+- name: Make sure a service is running
+  become: True
+  systemd: state=started name=nvml_agent

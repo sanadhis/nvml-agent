@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+function main () {
+    local conf_file="$1"
+    python nvml-agent.py $conf_file
+}
+
+main "$@"
