@@ -23,7 +23,10 @@
   $ pip install ansible==2.2.0
   ```
 
-## Prerequisites - Usage
+## Trying & Testing the Agent
+Go to /scripts dir and find detailed instruction there.
+
+## Prerequisites to Install the Agent
 
 1. Make sure to execute the script in a machine that can list all nodes in your kubernetes cluster
   ```bash
@@ -35,7 +38,7 @@
   $ ssh [your-node-1]
   ```
 
-## Usage
+## Install the Agent
 
 1. If you just want to install the prerequisites software:
   ```bash
@@ -46,6 +49,14 @@
   ```bash
   $ ./install.sh
   ```
+
+## Important Concepts for NVIDIA Utilization in Kubernetes
+
+- [NVIDIA-Driver](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
+- [Docker-NVIDIA-GPU](https://github.com/NVIDIA/nvidia-docker/wiki)
+- [Kubernetes-NVIDIA-GPU](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
+
+Or follow my scripts for installing GPU: [here](https://github.com/sanadhis/kube-ubuntu-utils)
 
 ## Maintainer
 
