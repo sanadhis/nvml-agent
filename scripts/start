@@ -4,7 +4,8 @@ set -e
 
 function main () {
     local conf_file="$1"
-    python nvml-agent.py $conf_file
+    local dir="$(dirname "$0")"
+    python $dir/nvml-agent.py $conf_file
 }
 
 main "$@"
