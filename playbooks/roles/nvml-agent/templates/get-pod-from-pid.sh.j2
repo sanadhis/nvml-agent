@@ -1,5 +1,6 @@
 #!/bin/bash
 pid="$1"
+{% raw %}
 
 pod_pid=$(pstree -sg $pid | awk -F "[()]" '{ for (i=2; i<NF; i+=2) print $i }' | sed -n '5 p')
 docker_process=$(docker ps -q | xargs docker inspect --format '{{.State.Pid}} {{.Name}} {{.Id}}' | grep "^$pod_pid")
@@ -21,3 +22,5 @@ namespace_name=$(echo $pod_details | cut -d _ -f 4)
 echo $container_name
 echo $pod_name
 echo $namespace_name
+
+{% endraw %}
