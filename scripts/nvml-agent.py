@@ -317,6 +317,8 @@ def main():
         print("Error: Configuration file is not given!")
     except IOError:
         print("Error: File does not exist!")
+    except:
+        print("Error")
 
 if __name__ == "__main__":
     main()
