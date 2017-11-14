@@ -2,7 +2,7 @@
 
 ## Testing the nvml-agent with InfluxDB Driver
 
-1. Make sure you have **python-influxdb** and **pynvml** in your machine:
+1. Make sure you have **python-influxdb** and **[pynvml](https://pypi.python.org/pypi/nvidia-ml-py/7.352.0)** in your machine:
 
 2. Create conf.yaml configuration file (**note that conf.yaml in scripts/ is ignored**):
   ```bash
@@ -25,7 +25,7 @@
 ## Testing the nvml.py only
 **Note that this script will run forever and useful for debugging process**
 
-1. Make sure you have **pynvml** in your machine:
+1. Make sure you have **[pynvml](https://pypi.python.org/pypi/nvidia-ml-py/7.352.0)** in your machine:
 
 2. Execute nvml.py:
   ```bash
