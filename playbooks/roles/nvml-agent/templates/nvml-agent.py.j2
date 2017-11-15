@@ -203,9 +203,9 @@ class GPUStat(object):
                             processes.append(process)
                             parentProcesses.append(parentProcess)
                         except psutil.NoSuchProcess:
-                            print("Error No Such Process")
+                            LOGGER.error("PSutil No Such Process")
                         except psutil.Error:
-                            print("Error: PSutil General")
+                            LOGGER.error("PSutil General Error")
 
                 # list, each GPU can have >1 running process(es) (but in Kubernetes 1.8, they should come from same container/pod)
                 pod_details = []
@@ -276,7 +276,7 @@ class InfluxDBDriver:
                                    )
         except InfluxDBClientError:
             client = None
-            print("Not Working") 
+            LOGGER.error("Influxdb connection does not working") 
 
         # this->object->client
         self.client = client
@@ -332,7 +332,7 @@ class InfluxDBDriver:
                 try:
                     self.client.write_points(json_body)
                 except InfluxDBClientError as err:
-                    print("Influx is not working here: ",err)             
+                    LOGGER.error("Cannot write into influxdb, check configuration")             
                     pass 
 
 
@@ -342,7 +342,7 @@ def setup_logging():
     """
 
     # Get path configuration file from given env and set default file path in addition
-    default_path  = "/etc/nvml-agent/logging.yaml"
+    default_path  = "logging.yaml"
     default_level = logging.INFO
     env_key       = "NVML_LOG_CFG"
     value         = os.getenv(env_key, None)
@@ -367,7 +367,7 @@ def get_influxdb_conf():
     """
 
     # Get path configuration file from given env and set default file path in addition
-    default_path = "/etc/nvml-agent/conf.yaml"
+    default_path = "conf.yaml"
     env_key      = "NVML_INFLUX_CFG"
     value        = os.getenv(env_key, None)
 

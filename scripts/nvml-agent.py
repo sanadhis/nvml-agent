@@ -202,9 +202,9 @@ class GPUStat(object):
                             processes.append(process)
                             parentProcesses.append(parentProcess)
                         except psutil.NoSuchProcess:
-                            print("Error No Such Process")
+                            LOGGER.error("PSutil No Such Process")
                         except psutil.Error:
-                            print("Error: PSutil General")
+                            LOGGER.error("PSutil General Error")
 
                 # list, each GPU can have >1 running process(es) (but in Kubernetes 1.8, they should come from same container/pod)
                 pod_details = []
@@ -275,7 +275,7 @@ class InfluxDBDriver:
                                    )
         except InfluxDBClientError:
             client = None
-            print("Not Working") 
+            LOGGER.error("Influxdb connection does not working") 
 
         # this->object->client
         self.client = client
@@ -331,7 +331,7 @@ class InfluxDBDriver:
                 try:
                     self.client.write_points(json_body)
                 except InfluxDBClientError as err:
-                    print("Influx is not working here: ",err)             
+                    LOGGER.error("Cannot write into influxdb, check configuration")             
                     pass 
 
 
