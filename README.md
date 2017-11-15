@@ -50,6 +50,18 @@ Go to /scripts dir and find detailed instruction there.
   $ ./install.sh
   ```
 
+## Starting and Stopping the Agent
+Note that the scripts is installed as systemd service.
+1. Start the nvml agent:
+  ```bash
+  $ sudo service nvml_agent start
+  ```
+
+1. Stop the nvml agent:
+  ```bash
+  $ sudo service nvml_agent stop
+  ```
+
 ## Important Concepts for NVIDIA Utilization in Kubernetes
 
 - [NVIDIA-Driver](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
