@@ -9,10 +9,21 @@
   set_fact:
     software_dir : "{{ ansible_env.HOME }}/.software"
 
-- name: Install python-influxdb
+- name: Ensure python-influxdb
   pip: 
     name: "influxdb"
     version: "{{ python_influxdb_version | default('4.1.1') }}"
+
+- name: Ensure python-psutil
+  pip: 
+    name: "psutil"
+    version: "{{ python_psutil_version | default('5.4.1') }}"
+
+- name: Ensure python-yaml system wide
+  become: True
+  apt: 
+    name: "python-yaml"
+    update_cache: yes
 
 - name: Ensure .software dir
   file:
