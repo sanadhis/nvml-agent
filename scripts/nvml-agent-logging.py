@@ -13,7 +13,7 @@ import socket
 import sys
 import yaml
 
-# Global logger var
+# Global LOGGER var
 LOGGER = logging.getLogger(__name__)
 
 # --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #

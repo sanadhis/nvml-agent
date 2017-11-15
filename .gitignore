@@ -2,3 +2,4 @@ inventory
 *.retry
 .DS_Store
 scripts/conf.yaml
+scripts/*.log
