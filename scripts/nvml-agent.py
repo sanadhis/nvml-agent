@@ -336,12 +336,26 @@ class InfluxDBDriver:
 
 
 def setup_logging():
-    """Configure basic logging format
+    """Configure custom logging format
     Returns None
     """
 
-    # set to only log info
-    logging.basicConfig(level=logging.INFO)
+    # set logging level to debug    
+    LOGGER.setLevel(logging.DEBUG)
+
+    # the script is purposed to debug, so here we show all logging level into stdout
+    # create a streamHandler to stdout
+    ch = logging.StreamHandler(sys.stdout)
+
+    # set logging level to debug    
+    ch.setLevel(logging.DEBUG)
+
+    # set log format
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+
+    # add handler to global logger var
+    LOGGER.addHandler(ch)
 
 
 def get_influxdb_conf():
