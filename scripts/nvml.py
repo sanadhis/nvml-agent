@@ -5,6 +5,7 @@ import psutil
 import os.path
 import subprocess
 import logging
+import sys
 
 # Global LOGGER var
 LOGGER = logging.getLogger(__name__)
