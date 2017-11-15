@@ -113,7 +113,7 @@ def benchmark_gpu():
             namespace  = out.split("\n")[4]
 
             # Display pod information and its usage
-            LOGGER.info(",".join([container,pod,namespace,proc['username'],str(proc['gpu_memory_usage']),str(proc['pid'])]))
+            LOGGER.info(",".join([str(index)+":",container,pod,namespace,proc['username'],str(proc['gpu_memory_usage']),str(proc['pid'])]))
 
         # Set one second delay between each GPU statistics    
         sleep(1)  
@@ -145,7 +145,7 @@ def setup_logging():
 def main():
     # Set the custom logging format 
     setup_logging()
-    LOGGER.info("Log application is ready!")  
+    LOGGER.debug("Log application is ready!")  
     
     # init the python-nvml driver
     N.nvmlInit()
