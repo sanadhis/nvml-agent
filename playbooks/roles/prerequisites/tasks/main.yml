@@ -10,11 +10,13 @@
     software_dir : "{{ ansible_env.HOME }}/.software"
 
 - name: Ensure python-influxdb
+  become: True
   pip: 
     name: "influxdb"
     version: "{{ python_influxdb_version | default('4.1.1') }}"
 
 - name: Ensure python-psutil
+  become: True
   pip: 
     name: "psutil"
     version: "{{ python_psutil_version | default('5.4.1') }}"
