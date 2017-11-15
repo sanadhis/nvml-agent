@@ -4,7 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/etc/nvml-agent/start '/etc/nvml-agent/conf.yaml'
+Environment="NVML_LOG_CFG=/etc/nvml-agent/logging.yaml"
+Environment="NVML_INFLUX_CFG=/etc/nvml-agent/conf.yaml"
+ExecStart=
+ExecStart=/etc/nvml-agent/start $NVML_LOG_CFG $NVML_INFLUX_CFG
 Restart=always
 StartLimitInterval=0
 RestartSec=5

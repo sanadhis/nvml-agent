@@ -3,9 +3,12 @@
 set -e
 
 function main () {
-    local conf_file="$1"
+    local log_conf_file="$1"
+    local influx_conf_file="$2"    
     local dir="$(dirname "$0")"
-    python $dir/nvml-agent.py $conf_file
+    NVML_INFLUX_CFG=$influx_conf_file \
+        NVML_LOG_CFG=$log_conf_file \
+        python $dir/nvml-agent.py
 }
 
 main "$@"

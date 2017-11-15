@@ -3,6 +3,8 @@ from datetime import datetime
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
+import logging
+import logging.config
 import os.path
 import pynvml as N
 import psutil
@@ -10,6 +12,9 @@ import subprocess
 import socket
 import sys
 import yaml
+
+# Global LOGGER var
+LOGGER = logging.getLogger(__name__)
 
 # --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #
 class GPUStat(object):
@@ -245,6 +250,7 @@ class GPUStat(object):
         # return query result as GPUStat object
         return GPUStat(gpus_pod_usage)        
 
+
 # --------- Class InfluxdbDriver : handle write process of GPU stats into Influxdb server -------- #
 class InfluxDBDriver:
     def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db, *args):
@@ -328,33 +334,90 @@ class InfluxDBDriver:
                     print("Influx is not working here: ",err)             
                     pass 
 
+
+def setup_logging():
+    """Configure custom logging format for the agent
+    Returns None
+    """
+
+    # Get path configuration file from given env and set default file path in addition
+    default_path  = "logging.yaml"
+    default_level = logging.INFO
+    env_key       = "NVML_LOG_CFG"
+    value         = os.getenv(env_key, None)
+
+    # default path is equal to NVML_LOG_CFG in env, if it is set
+    if value:
+        default_path = value
+
+    # Read the YAML file
+    if os.path.exists(default_path):
+        with open(default_path, "r") as ymlfile:
+            config   = yaml.load(ymlfile)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
+
+
+def get_influxdb_conf():
+    """Read configuration for influxdb from file with YAML format
+    Returns:
+        influx_cfg (py dictionary): information about Influxdb server's hostname, port, username, password and database name
+    """
+
+    # Get path configuration file from given env and set default file path in addition
+    default_path = "conf.yaml"
+    env_key      = "NVML_INFLUX_CFG"
+    value        = os.getenv(env_key, None)
+
+    # default path is equal to NVML_INFLUX_CFG in env, if it is set
+    if value:
+        default_path = value
+
+    # Read the YAML file
+    if os.path.exists(default_path):
+        with open(default_path, "r") as  ymlfile:
+            influx_cfg  = (yaml.load(ymlfile))
+    else:
+        LOGGER.error("Configuration file not found!")
+    
+    return influx_cfg
+
+
 # --------- Main function goes here -------- #
 def main():
-    """Read stats from GPU and write them into Influxdb server"""
+    """Read stats from GPU and write them into Influxdb server
+    Returns None
+    """
 
     try:
-        # Read configuration file with YAML format
-        conf_file = sys.argv[1]
-        with open(conf_file, "r") as  ymlfile:
-            influx_cfg  = (yaml.load(ymlfile))
+        # Set the custom logging format 
+        setup_logging()
+        LOGGER.debug("Log application is ready!")  
+
+        # Get the configuration to connect and write to Influxdb server
+        influx_cfg = get_influxdb_conf()
+        LOGGER.debug("Configuration file successfully loaded!")        
 
         # Request the GPU statistics
-        gpu_stats = GPUStat().new_query()
-        print(gpu_stats.gpus_pod_usage)
+        gpu_stats  = GPUStat().new_query()
+        LOGGER.info(gpu_stats.gpus_pod_usage)
+        LOGGER.debug("Success getting statistics from GPU!")
         
         # Connect into Influxdb instance using given configuration
         influxClient = InfluxDBDriver(**influx_cfg)
         # Write the statistics into Influxdb        
         influxClient.write(gpu_stats)
-    
-    except IndexError:
-        print("Error: Configuration file is not given!")
+        LOGGER.debug("Success writing metrics to Influxdb!")
+
     except IOError:
-        print("Error: File does not exist!")
+        LOGGER.error("File does not exist!")
+    except TypeError:
+        LOGGER.error("Wrong configuration file")
     except:
-        print("Error")
+        LOGGER.error("Application hard error!")
 
 
 # --------- Main function triggered here -------- #
-if __name__ == "__main__":
+if __name__ == "__main__":  
     main()
