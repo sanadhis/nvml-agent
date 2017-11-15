@@ -336,27 +336,12 @@ class InfluxDBDriver:
 
 
 def setup_logging():
-    """Configure custom logging format for the agent
+    """Configure basic logging format
     Returns None
     """
 
-    # Get path configuration file from given env and set default file path in addition
-    default_path  = "logging.yaml"
-    default_level = logging.INFO
-    env_key       = "NVML_LOG_CFG"
-    value         = os.getenv(env_key, None)
-
-    # default path is equal to NVML_LOG_CFG in env, if it is set
-    if value:
-        default_path = value
-
-    # Read the YAML file
-    if os.path.exists(default_path):
-        with open(default_path, "r") as ymlfile:
-            config   = yaml.load(ymlfile)
-        logging.config.dictConfig(config)
-    else:
-        logging.basicConfig(level=default_level)
+    # set to only log info
+    logging.basicConfig(level=logging.INFO)
 
 
 def get_influxdb_conf():

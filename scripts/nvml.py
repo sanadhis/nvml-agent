@@ -1,101 +1,152 @@
+from time import sleep
+
 import pynvml as N
 import psutil
 import os.path
 import subprocess
-from time import sleep
+import logging
 
-def get_process_info(nv_process, pid):
-    """Get the process information of specific pid"""
+# Global LOGGER var
+LOGGER = logging.getLogger(__name__)
+
+def get_process_info(nv_process):
+    """Get the process information of specific GPU process ; username, command, pid, and GPU memory usage
+    Args:
+        nv_process (nvmlFriendlyObject) : A process that utilize the resource of NVIDIA GPU
+    Returns:
+        process    (py dictionary)      : Contains the desired information of GPU process
+    """
+
+    # init dict to store process' information
     process = {}
-    ps_process = psutil.Process(pid=pid)
+
+    # Store pid and GPU memory usage into dict
+    # get pid of the process    
+    process['pid']              = nv_process.pid
+    # Bytes to MBytes
+    process['gpu_memory_usage'] = int(nv_process.usedGpuMemory / 1024 / 1024)
+    
+    # get process detail (process object) for given pid of a nvidia process    
+    ps_process          = psutil.Process(pid = nv_process.pid)
+    
+    # get process username
     process['username'] = ps_process.username()
+
+    # figure out OS command that execute the process
     # cmdline returns full path; as in `ps -o comm`, get short cmdnames.
     _cmdline = ps_process.cmdline()
-    if not _cmdline:   # sometimes, zombie or unknown (e.g. [kworker/8:2H])
+    
+    # sometimes, zombie or unknown (e.g. [kworker/8:2H])
+    if not _cmdline:   
         process['command'] = '?'
     else:
         process['command'] = os.path.basename(_cmdline[0])
-    # Bytes to MBytes
-    process['gpu_memory_usage'] = int(nv_process.usedGpuMemory / 1024 / 1024)
-    process['pid'] = nv_process.pid
+    
     return process
 
-def benchmark_gpu(device_count):
+def benchmark_gpu():
+    """Query all utilizations in each GPU and resolve them to pod information and identity"""
+    
+    # detect all NVIDIA GPU in machine
+    device_count = N.nvmlDeviceGetCount()
+
+    # Init empty list to store usage by each GPU
+    gpus_usage   = []
+    
+    # Iterate through available GPU
     for index in range(device_count):
+        # get the NVML object based on GPU's index target
+        # get the name and uuid of NVIDIA GPU
         handle = N.nvmlDeviceGetHandleByIndex(index)
-        name = (N.nvmlDeviceGetName(handle))
-        uuid = (N.nvmlDeviceGetUUID(handle))
+        name   = (N.nvmlDeviceGetName(handle))
+        uuid   = (N.nvmlDeviceGetUUID(handle))
+
+        # init list to store process and parent container (pod) for each process that utilizes NVIDIA
+        # process        = jobs (container) that utilize NVIDA GPU
+        processes       = []
         
-        try:
-            temperature = N.nvmlDeviceGetTemperature(handle, N.NVML_TEMPERATURE_GPU)
-        except:
-            temperature = None
-
-        try:
-            memory = N.nvmlDeviceGetMemoryInfo(handle) # in Bytes
-        except N.NVMLError:
-            memory = None  # Not supported
-
-        try:
-            utilization = N.nvmlDeviceGetUtilizationRates(handle)
-        except N.NVMLError:
-            utilization = None  # Not supported
-
-        try:
-            power = N.nvmlDeviceGetPowerUsage(handle)
-        except:
-            power = None
-
-        try:
-            power_limit = N.nvmlDeviceGetEnforcedPowerLimit(handle)
-        except:
-            power_limit = None
-
-        processes = []
+        # Get running processes in each GPU
         try:
             nv_comp_processes = N.nvmlDeviceGetComputeRunningProcesses(handle)
         except N.NVMLError:
             nv_comp_processes = None  # Not supported
+
+        # Get running graphics processes in each GPU                
         try:
             nv_graphics_processes = N.nvmlDeviceGetGraphicsRunningProcesses(handle)
         except N.NVMLError:
             nv_graphics_processes = None  # Not supported
 
+        # Check if process is found or not
         if nv_comp_processes is None and nv_graphics_processes is None:
             processes = None   # Not supported (in both cases)
         else:
-            nv_comp_processes = nv_comp_processes or []
+            nv_comp_processes     = nv_comp_processes or []
             nv_graphics_processes = nv_graphics_processes or []
+            # Iterate through running process found, inspect each process 
             for nv_process in (nv_comp_processes + nv_graphics_processes):
-                # TODO: could be more information such as system memory usage,
-                # CPU percentage, create time etc.
                 try:
-                    process = get_process_info(nv_process, nv_process.pid)
+                    process = get_process_info(nv_process)
                     processes.append(process)
                 except psutil.NoSuchProcess:
-                    # TODO: add some reminder for NVML broken context
-                    # e.g. nvidia-smi reset  or  reboot the system
-                    pass
+                    LOGGER.info("PSutil No Such Process")
+                except psutil.Error:
+                    LOGGER.info("PSutil General Error")
 
-        print(index, name, uuid)
+        # Display NVIDIA GPU information
+        LOGGER.info(index, name, uuid)
 
+        # iterate throught the process (container) that runs on GPU
         for proc in processes:
+            # trigger bash script to resolve process pid to pod information
             p = subprocess.Popen(
                 ["bash", "get-pod-from-pid.sh", str(proc['pid']) ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            container = out.split("\n")[2]
-            pod = out.split("\n")[3]
-            namespace = out.split("\n")[4]
-            print(container,pod,namespace,proc['username'],proc['gpu_memory_usage'],proc['pid'])
-        sleep(1)        
+                stdin  = subprocess.PIPE,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE)
+            out, err   = p.communicate()
 
-if __name__ == "__main__":
+            # Get the result from stdout, see "get-pod-from-pid" for more details
+            container  = out.split("\n")[2]
+            pod        = out.split("\n")[3]
+            namespace  = out.split("\n")[4]
+
+            # Display pod information and its usage
+            LOGGER.info(container,pod,namespace,proc['username'],proc['gpu_memory_usage'],proc['pid'])
+
+        # Set one second delay between each GPU statistics    
+        sleep(1)  
+
+def setup_logging():
+    """Configure basic logging format
+    Returns None
+    """
+
+    # set to only log info
+    logging.basicConfig(level=logging.INFO)
+
+
+# --------- Main function goes here -------- #
+def main():
+    # Set the custom logging format 
+    setup_logging()
+    LOGGER.info("Log application is ready!")  
+    
+    # init the python-nvml driver
     N.nvmlInit()
-    device_count = N.nvmlDeviceGetCount()
+    
+    # Loop forever
     while True:
-        benchmark_gpu(device_count)
+        # Get the stats and print them
+        benchmark_gpu()
+
+        # Set one second delay between queries
         sleep(1)
+
+    # close the python-nvml driver        
     N.nvmlShutdown()
+
+
+# --------- Main function triggered here -------- #
+if __name__ == "__main__":  
+    main()
