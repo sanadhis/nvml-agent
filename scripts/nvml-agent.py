@@ -413,7 +413,7 @@ def main():
     except IOError:
         LOGGER.error("File does not exist!")
     except TypeError:
-        LOGGER.error("Wrong configuration file")
+        LOGGER.error("Wrong formating in YAML configuration file")
     except:
         LOGGER.error("Application hard error!")
 
