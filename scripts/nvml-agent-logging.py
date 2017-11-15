@@ -13,7 +13,7 @@ import socket
 import sys
 import yaml
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 # --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #
 class GPUStat(object):
@@ -346,7 +346,7 @@ def main():
 
         # Request the GPU statistics
         gpu_stats = GPUStat().new_query()
-        log.info(gpu_stats.gpus_pod_usage)
+        LOGGER.info(gpu_stats.gpus_pod_usage)
         
         # Connect into Influxdb instance using given configuration
         influxClient = InfluxDBDriver(**influx_cfg)
@@ -354,11 +354,11 @@ def main():
         influxClient.write(gpu_stats)
     
     except IndexError:
-        log.error("Error: Configuration file is not given!")
+        LOGGER.error("Error: Configuration file is not given!")
     except IOError:
-        log.error("Error: File does not exist!")
+        LOGGER.error("Error: File does not exist!")
     except:
-        log.error("Error")
+        LOGGER.error("Error")
 
 
 # --------- Setting Log format -------- #
@@ -376,7 +376,7 @@ def setup_logging():
         logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=default_level)
-    logger.info("Let's Roll!")
+    LOGGER.info("Let's Roll!")
 
 
 # --------- Main function triggered here -------- #
