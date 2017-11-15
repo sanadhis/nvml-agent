@@ -1,3 +1,4 @@
+{% raw %}
 #!/bin/bash
 # the script requires pid of a process that runs on GPU.
 # to check the process pid, issue "nvidia-smi" in shell terminal
@@ -42,3 +43,4 @@ namespace_name=$(echo $pod_details | cut -d _ -f 4)
 echo $pod_container_name
 echo $pod_name
 echo $namespace_name
+{% endraw %}
