@@ -221,7 +221,7 @@ class GPUStat(object):
                                     "pod_namespace"     : pod['namespace'],
                                     "pod_proc_username" : proc['username'],
                                     "pod_gpu_usage"     : proc['gpu_memory_usage'],
-                                    "pod_proc_pid"      : proc['pid']
+                                    "pod_proc_pid"      : proc['pid']               # long data type
                                 }
                     # information of each pod that runs jobs in kubernetes cluster
                     pod_details.append(pod_detail)
