@@ -4,6 +4,7 @@ from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
 import logging
+import logging.config
 import os.path
 import pynvml as N
 import psutil
@@ -11,6 +12,8 @@ import subprocess
 import socket
 import sys
 import yaml
+
+logger = logging.getLogger(__name__)
 
 # --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #
 class GPUStat(object):
@@ -246,6 +249,7 @@ class GPUStat(object):
         # return query result as GPUStat object
         return GPUStat(gpus_pod_usage)        
 
+
 # --------- Class InfluxdbDriver : handle write process of GPU stats into Influxdb server -------- #
 class InfluxDBDriver:
     def __init__(self, influxdb_host, influxdb_port, influxdb_user, influxdb_pass, influxdb_db, *args):
@@ -329,6 +333,7 @@ class InfluxDBDriver:
                     print("Influx is not working here: ",err)             
                     pass 
 
+
 # --------- Main function goes here -------- #
 def main():
     """Read stats from GPU and write them into Influxdb server"""
@@ -341,7 +346,7 @@ def main():
 
         # Request the GPU statistics
         gpu_stats = GPUStat().new_query()
-        print(gpu_stats.gpus_pod_usage)
+        log.info(gpu_stats.gpus_pod_usage)
         
         # Connect into Influxdb instance using given configuration
         influxClient = InfluxDBDriver(**influx_cfg)
@@ -349,17 +354,17 @@ def main():
         influxClient.write(gpu_stats)
     
     except IndexError:
-        print("Error: Configuration file is not given!")
+        log.error("Error: Configuration file is not given!")
     except IOError:
-        print("Error: File does not exist!")
+        log.error("Error: File does not exist!")
     except:
-        print("Error")
+        log.error("Error")
 
 
-# --------- Main function triggered here -------- #
-if __name__ == "__main__":
-    default_path='logging.yaml',
-    default_level=logging.INFO,
+# --------- Setting Log format -------- #
+def setup_logging():
+    default_path='logging.yaml'
+    default_level=logging.INFO
     env_key='NVML_LOG_CFG'
     path = default_path
     value = os.getenv(env_key, None)
@@ -371,4 +376,9 @@ if __name__ == "__main__":
         logging.config.dictConfig(config)
     else:
         logging.basicConfig(level=default_level)
+    logger.info("Let's Roll!")
+
+
+# --------- Main function triggered here -------- #
+if __name__ == "__main__":
     main()
