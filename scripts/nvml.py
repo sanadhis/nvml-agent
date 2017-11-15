@@ -94,7 +94,7 @@ def benchmark_gpu():
                     LOGGER.info("PSutil General Error")
 
         # Display NVIDIA GPU information
-        LOGGER.info(index, name, uuid)
+        LOGGER.info(",".join([str(index), name, uuid]))
 
         # iterate throught the process (container) that runs on GPU
         for proc in processes:
@@ -112,7 +112,7 @@ def benchmark_gpu():
             namespace  = out.split("\n")[4]
 
             # Display pod information and its usage
-            LOGGER.info(container,pod,namespace,proc['username'],proc['gpu_memory_usage'],proc['pid'])
+            LOGGER.info(",".join([container,pod,namespace,proc['username'],str(proc['gpu_memory_usage']),str(proc['pid'])]))
 
         # Set one second delay between each GPU statistics    
         sleep(1)  
