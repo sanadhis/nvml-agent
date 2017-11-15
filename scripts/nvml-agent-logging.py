@@ -13,6 +13,7 @@ import socket
 import sys
 import yaml
 
+# Global logger var
 LOGGER = logging.getLogger(__name__)
 
 # --------- Class GPUStat : query, functions and process needed to obtain the culprit (pods) that execute jobs in GPU -------- #
@@ -334,15 +335,64 @@ class InfluxDBDriver:
                     pass 
 
 
-# --------- Main function goes here -------- #
-def main():
-    """Read stats from GPU and write them into Influxdb server"""
+def setup_logging():
+    """Configure custom logging format for the agent
+    Returns None
+    """
 
-    try:
-        # Read configuration file with YAML format
-        conf_file = sys.argv[1]
+    # Get path configuration file from given env and set default file path in addition
+    default_path  = "/etc/nvml-agent/logging.yaml"
+    default_level = logging.INFO
+    env_key       = "NVML_LOG_CFG"
+    value         = os.getenv(env_key, None)
+
+    # default path is equal to NVML_LOG_CFG in env, if it is set
+    if value:
+        default_path = value
+
+    # Read the YAML file
+    if os.path.exists(default_path):
+        with open(default_path, "r") as f:
+            config   = yaml.load(f)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
+    LOGGER.info("Application is ready!")
+
+
+def get_influxdb_conf():
+    """Read configuration for influxdb from file with YAML format
+    Returns:
+        influx_cfg (py dictionary): information about Influxdb server's hostname, port, username, password and database name
+    """
+
+    # Get path configuration file from given env and set default file path in addition
+    default_path = "/etc/nvml-agent/conf.yaml"
+    env_key      = "NVML_INFLUX_CFG"
+    value        = os.getenv(env_key, None)
+
+    # default path is equal to NVML_INFLUX_CFG in env, if it is set
+    if value:
+        default_path = value
+
+    # Read the YAML file
+    if os.path.exists(default_path):
         with open(conf_file, "r") as  ymlfile:
             influx_cfg  = (yaml.load(ymlfile))
+    else:
+        LOGGER.error("Configuration file not found!")
+    
+    return influx_cfg
+
+
+# --------- Main function goes here -------- #
+def main():
+    """Read stats from GPU and write them into Influxdb server
+    Returns None
+    """
+    try:
+        # Get the configuration to connect and write to Influxdb server
+        influx_cfg = get_influxdb_conf()
 
         # Request the GPU statistics
         gpu_stats = GPUStat().new_query()
@@ -354,31 +404,14 @@ def main():
         influxClient.write(gpu_stats)
     
     except IndexError:
-        LOGGER.error("Error: Configuration file is not given!")
+        LOGGER.error("Configuration file is not given!")
     except IOError:
-        LOGGER.error("Error: File does not exist!")
+        LOGGER.error("File does not exist!")
     except:
-        LOGGER.error("Error")
-
-
-# --------- Setting Log format -------- #
-def setup_logging():
-    default_path='logging.yaml'
-    default_level=logging.INFO
-    env_key='NVML_LOG_CFG'
-    path = default_path
-    value = os.getenv(env_key, None)
-    if value:
-        path = value
-    if os.path.exists(path):
-        with open(path, 'rt') as f:
-            config = yaml.load(f)
-        logging.config.dictConfig(config)
-    else:
-        logging.basicConfig(level=default_level)
-    LOGGER.info("Let's Roll!")
+        LOGGER.error("Application hard error!")
 
 
 # --------- Main function triggered here -------- #
 if __name__ == "__main__":
+    setup_logging()
     main()
