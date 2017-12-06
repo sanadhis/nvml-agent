@@ -417,7 +417,7 @@ def main():
         LOGGER.error("Wrong formating in YAML configuration file")
     # Catch Error when library is missing
     except N.NVMLError:
-        LOGGER.debug("NVML Library is missing")
+        LOGGER.info("NVML Library is missing, no gpu data obtained")
     except:
         LOGGER.error("Application hard error!")
 
