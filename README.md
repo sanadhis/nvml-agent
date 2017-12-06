@@ -42,6 +42,13 @@ Go to /scripts dir and find detailed instruction there.
 Ensure that you have your master public key (.pub file) on authorized_keys file in every node. You need to be able to SSH each node without password.
 [Hint](http://www.linuxproblem.org/art_9.html)
 
+## Test the Connection
+0. Test your connection for each node in the cluster:
+  ```bash
+  $ ./test-connection.sh
+  ```
+Ensure that you get all success "pong" responses from all your nodes.
+
 ## Install the Agent on the Cluster
 
 1. If you just want to install the prerequisites software:
