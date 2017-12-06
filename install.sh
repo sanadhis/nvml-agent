@@ -38,7 +38,7 @@ function main () {
     read -p "Enter db name": influxdb_db   
 
     print-banner "Enter password for sudo privelege in corresponding target nodes"
-    ansible-playbook playbooks/$PLAYBOOK -K \
+    ansible-playbook playbooks/$PLAYBOOK \
       -i $PWD/inventory/target \
       -e "target=kube-cluster" \
       -e "current_dir=${current_dir}" \
