@@ -90,12 +90,12 @@ def benchmark_gpu():
                     process = get_process_info(nv_process)
                     processes.append(process)
                 except psutil.NoSuchProcess:
-                    LOGGER.info("PSutil No Such Process")
+                    LOGGER.debug("PSutil No Such Process")
                 except psutil.Error:
-                    LOGGER.info("PSutil General Error")
+                    LOGGER.debug("PSutil General Error")
 
         # Display NVIDIA GPU information
-        LOGGER.info(",".join([str(index), name, uuid]))
+        LOGGER.debug(",".join([str(index), name, uuid]))
 
         # iterate throught the process (container) that runs on GPU
         for proc in processes:
@@ -113,7 +113,7 @@ def benchmark_gpu():
             namespace  = out.split("\n")[4]
 
             # Display pod information and its usage
-            LOGGER.info(",".join([str(index)+":",container,pod,namespace,proc['username'],str(proc['gpu_memory_usage']),str(proc['pid'])]))
+            LOGGER.debug(",".join([str(index)+":",container,pod,namespace,proc['username'],str(proc['gpu_memory_usage']),str(proc['pid'])]))
 
         # Set one second delay between each GPU statistics    
         sleep(1)  
@@ -165,7 +165,7 @@ def main():
 
     # Catch Error when library is missing
     except N.NVMLError:
-        LOGGER.debug("NVML Library is missing")
+        LOGGER.debug("NVML Library is missing, no gpu data obtained")
 
 # --------- Main function triggered here -------- #
 if __name__ == "__main__":  
