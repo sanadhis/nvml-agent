@@ -40,7 +40,7 @@
 - name: Reload Daemon
   command: systemctl daemon-reload
 
-- name: enable service nvml-agent and ensure it is not masked
+- name: Enable service nvml-agent and ensure it is not masked
   systemd:
     name: nvml_agent
     enabled: yes
