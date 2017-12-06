@@ -2,8 +2,16 @@
 
 > Monitor NVIDIA GPU usage for each container in Kubernetes' pods.
 
-## Prerequisites - jq & Ansible
+## Trying & Testing the Agent on Single Node
+Go to /scripts dir and find detailed instruction there.
 
+# Installing the Agent
+**Note that to install the agent, you need to execute the scripts on the machine that satisfies these conditions:**
+* Have jq and ansible (version 2.2.0 is encouraged)
+* Can list all available nodes in your kubernetes cluster
+* Can access all available nodes with SSH **without password**.
+
+## Prerequisites Tools - jq & Ansible
 1. Make sure you have jq:
 * Ubuntu
   ```bash
@@ -25,10 +33,7 @@ Install a specific version of ansible:
   $ pip install ansible==2.2.0
   ```
 
-## Trying & Testing the Agent on Single Node
-Go to /scripts dir and find detailed instruction there.
-
-## Prerequisites to Install the Agent
+## Prerequisites to Install the Agent on the Cluster
 
 1. Make sure to execute the script in a machine that can list all nodes in your kubernetes cluster
   ```bash
@@ -42,7 +47,7 @@ Go to /scripts dir and find detailed instruction there.
 Ensure that you have your master public key (.pub file) on authorized_keys file in every node. You need to be able to SSH each node without password.
 [Hint](http://www.linuxproblem.org/art_9.html)
 
-## Test the Connection of Master into the Cluster Nodes
+## Test the Connection from Master to the Cluster Nodes
 0. Test your connection for each node in the cluster:
   ```bash
   $ ./test-connection.sh
