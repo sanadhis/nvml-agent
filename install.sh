@@ -37,14 +37,13 @@ function main () {
     print-banner "Input database to write the statistics for"
     read -p "Enter db name": influxdb_db   
 
-    print-banner "Enter password for sudo privelege in corresponding target nodes"
     ansible-playbook playbooks/$PLAYBOOK \
       -u root \
       -i $PWD/inventory/target \
       -e "target=kube-cluster" \
       -e "current_dir=${current_dir}" \
       -e "influxdb_host=$influxdb_host" \
-      -e "influxdb_port=$influxdb_port" \
+      -e "influxdb_port=${influxdb_port:-8086}" \
       -e "influxdb_user=$influxdb_user" \
       -e "influxdb_pass=$influxdb_pass" \
       -e "influxdb_db=$influxdb_db"
