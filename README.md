@@ -5,8 +5,13 @@
 ## Prerequisites - jq & Ansible
 
 1. Make sure you have jq:
+* Ubuntu
   ```bash
   $ sudo apt-get update && sudo apt-get install jq
+  ```
+* Mac via brew
+  ```bash
+  $ brew install jq
   ```
 
 2. Make sure you have [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html) in your machine by issuing this command:
@@ -14,11 +19,8 @@
   $ ansible --version
   ```
 
-3. If you don't have ansible in your machine, I encourage you to install via pip:
-  ```bash
-  $ pip install ansible
-  ```
-  or install a specific version of ansible
+3. If you don't have ansible in your machine, I encourage you to install via pip (I strongly advise to use ansible 2.2.0)
+Install a specific version of ansible:
   ```bash
   $ pip install ansible==2.2.0
   ```
@@ -33,10 +35,12 @@ Go to /scripts dir and find detailed instruction there.
   $ kubectl get nodes
   ```
 
-2. Make sure you can access all machines by SSH
+2. Make sure you can access all machines by **SSH**
   ```bash
   $ ssh [your-node-1]
   ```
+Ensure that you have your master public key (.pub file) on authorized_keys file in every node. You need to be able to SSH each node without password.
+[Hint](http://www.linuxproblem.org/art_9.html)
 
 ## Install the Agent
 
