@@ -3,13 +3,11 @@
     nvml_agent_dir : "/etc/nvml-agent"
 
 - name: Ensure NVML agent dir
-  become: True
   file:
     path: "{{ nvml_agent_dir }}"
     state: directory
 
 - name: Install NVML Agent Scripts
-  become: True
   template:
     src: "{{ item }}.j2"
     dest: "{{ nvml_agent_dir }}/{{ item }}"
@@ -21,7 +19,6 @@
     - "start"
 
 - name: Changing NVML Agent Scripts Permissions (+x)
-  become: True
   file:
     dest: "{{ nvml_agent_dir }}/{{ item }}"
     mode: a+x
@@ -31,28 +28,25 @@
     - "start"
 
 - name: Install NVML Agent service
-  become: True
   template:
     src: "nvml_agent.service.j2"
     dest: "/etc/systemd/system/nvml_agent.service"
 
 - name: Ensure NVML agent logging dir
-  become: True
   file:
     path: "/var/log/nvml-agent"
     state: directory
 
 - name: Reload Daemon
-  become: True
-  systemd: daemon_reload=yes
+  command: systemctl daemon-reload
 
 - name: enable service nvml-agent and ensure it is not masked
-  become: True 
   systemd:
     name: nvml_agent
     enabled: yes
     masked: no
 
 - name: Make sure a service is running
-  become: True
-  systemd: state=started name=nvml_agent
+  systemd: 
+    state: started 
+    name: nvml_agent
