@@ -10,30 +10,26 @@
     software_dir : "{{ ansible_env.HOME }}/.software"
 
 - name: Ensure python-pip system wide
-  become: True
   apt: 
     name: "python-pip"
     update_cache: yes
 
 - name: Ensure python-influxdb
-  become: True
   pip: 
     name: "influxdb"
     version: "{{ python_influxdb_version | default('4.1.1') }}"
 
 - name: Ensure python-psutil
-  become: True
   pip: 
     name: "psutil"
     version: "{{ python_psutil_version | default('5.4.1') }}"
 
 - name: Ensure python-yaml system wide
-  become: True
   apt: 
     name: "python-yaml"
     update_cache: yes
 
-- name: Ensure .software dir
+- name: Ensure {{ software_dir }} dir
   file:
     path: "{{ software_dir }}"
     state: directory
@@ -45,6 +41,7 @@
 
 - name: Untar pynvml.tar.gz
   unarchive:
+    remote_src: true
     src: "{{ software_dir }}/pynvml.tar.gz"
     dest: "{{ software_dir }}"
 
@@ -52,5 +49,3 @@
   shell: python setup.py install
   args:
     chdir: "{{ software_dir }}/nvidia-ml-py-{{ pynvml_version }}/"
-  become: true
-  become_user: root

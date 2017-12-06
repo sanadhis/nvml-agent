@@ -20,6 +20,7 @@ function main () {
     current_dir="$PWD"
 
     ansible-playbook playbooks/$PLAYBOOK \
+      -u root \
       -i $PWD/inventory/target \
       -e "target=kube-cluster" \
       -e "current_dir=${current_dir}"

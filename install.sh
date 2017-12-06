@@ -39,6 +39,7 @@ function main () {
 
     print-banner "Enter password for sudo privelege in corresponding target nodes"
     ansible-playbook playbooks/$PLAYBOOK \
+      -u root \
       -i $PWD/inventory/target \
       -e "target=kube-cluster" \
       -e "current_dir=${current_dir}" \
