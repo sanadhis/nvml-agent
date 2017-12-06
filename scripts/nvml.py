@@ -147,20 +147,25 @@ def main():
     setup_logging()
     LOGGER.debug("Log application is ready!")  
     
-    # init the python-nvml driver
-    N.nvmlInit()
-    
-    # Loop forever
-    while True:
-        # Get the stats and print them
-        benchmark_gpu()
+    # Ensure NVML Shared Library is found
+    try:
+        # init the python-nvml driver
+        N.nvmlInit()
+        
+        # Loop forever
+        while True:
+            # Get the stats and print them
+            benchmark_gpu()
 
-        # Set one second delay between queries
-        sleep(1)
+            # Set one second delay between queries
+            sleep(1)
 
-    # close the python-nvml driver        
-    N.nvmlShutdown()
+        # close the python-nvml driver        
+        N.nvmlShutdown()
 
+    # Catch Error when library is missing
+    except N.NVMLError:
+        LOGGER.debug("NVML Library is missing")
 
 # --------- Main function triggered here -------- #
 if __name__ == "__main__":  

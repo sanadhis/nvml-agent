@@ -415,6 +415,9 @@ def main():
         LOGGER.error("File does not exist!")
     except TypeError:
         LOGGER.error("Wrong formating in YAML configuration file")
+    # Catch Error when library is missing
+    except N.NVMLError:
+        LOGGER.debug("NVML Library is missing")
     except:
         LOGGER.error("Application hard error!")
 
