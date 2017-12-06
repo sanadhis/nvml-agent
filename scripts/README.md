@@ -17,9 +17,9 @@
   influxdb_db  : "k8s"
   ```
 
-3. Execute nvml-agent.py with /path/to/conf/file as argument:
+3. Execute nvml-agent.py:
   ```bash
-  $ python nvml-agent.py "conf.yaml"
+  $ python nvml-agent.py
   ```
 
 ## Testing the nvml.py only
