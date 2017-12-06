@@ -9,6 +9,12 @@
   set_fact:
     software_dir : "{{ ansible_env.HOME }}/.software"
 
+- name: Ensure python-pip system wide
+  become: True
+  apt: 
+    name: "python-pip"
+    update_cache: yes
+
 - name: Ensure python-influxdb
   become: True
   pip: 
