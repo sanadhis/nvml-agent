@@ -25,7 +25,7 @@ Install a specific version of ansible:
   $ pip install ansible==2.2.0
   ```
 
-## Trying & Testing the Agent
+## Trying & Testing the Agent on Single Node
 Go to /scripts dir and find detailed instruction there.
 
 ## Prerequisites to Install the Agent
@@ -42,7 +42,7 @@ Go to /scripts dir and find detailed instruction there.
 Ensure that you have your master public key (.pub file) on authorized_keys file in every node. You need to be able to SSH each node without password.
 [Hint](http://www.linuxproblem.org/art_9.html)
 
-## Install the Agent
+## Install the Agent on the Cluster
 
 1. If you just want to install the prerequisites software:
   ```bash
