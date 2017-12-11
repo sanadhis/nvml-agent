@@ -12,7 +12,7 @@ echo $pod_pid
 
 # After we find the pid of pod, now we inspect docker ps -q to find details of the pod
 # we want to look for docker process name {{.Name}} especially because they contains: container name, pod namespace, and pod name
-docker_process=$(docker ps -q | xargs docker inspect --format '{{.State.Pid}} {{.Name}} {{.Id}}' | grep "^$pod_pid")
+docker_process=$(docker ps -q | xargs docker inspect --format '{{printf "%.0f %s %s" .State.Pid .Name .Id}}' | grep "^$pod_pid")
 
 # print docker process' details
 echo $docker_process

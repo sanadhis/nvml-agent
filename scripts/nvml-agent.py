@@ -123,7 +123,7 @@ class GPUStat(object):
                 # Inspect pid, docker process's name, and container's id of each container's id 
                 # (some are redundants, but it is to ensure we inspect the same process)
                 docker_inspect                         = subprocess.Popen(
-                                                        ["docker", "inspect", "--format","'{{.State.Pid}} {{.Name}} {{.Id}}'",container_id],
+                                                        ["docker", "inspect", "--format","'{{printf \"%.0f %s %s\" .State.Pid .Name .Id}}'",container_id],
                                                         stdin=subprocess.PIPE,
                                                         stdout=subprocess.PIPE,
                                                         stderr=subprocess.PIPE)
