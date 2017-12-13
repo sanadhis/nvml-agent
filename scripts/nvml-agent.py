@@ -317,7 +317,7 @@ class InfluxDBDriver:
                                         "gpu_uuid" : gpu_uuid,
                                         "gpu_index": gpu_index,
                                         "pod_name" : pod_name,
-                                        "pod_container_name" : pod_container_name,
+                                        "container_name" : pod_container_name,
                                         "namespace_name" : namespace_name
                                     },
                                     "time": stat_time,
